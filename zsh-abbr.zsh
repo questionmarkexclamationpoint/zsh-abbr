@@ -377,16 +377,16 @@ abbr() {
 
       abbreviation=$*
 
-      expansion=$(_abbr_regular_expansion "$abbreviation")
+      _abbr_regular_expansion "$abbreviation"
 
       if [[ ! "$expansion" ]]; then
-        expansion=$(_abbr_global_expansion "$abbreviation" 1)
+        _abbr_global_expansion "$abbreviation" 1
       fi
 
       if [[ ! "$expansion" ]]; then
         _abbr_create_files
         source ${_abbr_tmpdir}global-user-abbreviations
-        expansion=$(_abbr_global_expansion "$abbreviation" 0)
+        _abbr_global_expansion "$abbreviation" 0
       fi
 
       'builtin' 'echo' - $expansion
@@ -1182,7 +1182,6 @@ _abbr_regular_expansion() {
 
     local -a REPLY
     local abbreviation
-    local expansion
 
     _abbr_regular_expansion:get_expansion() {
       {
@@ -1231,11 +1230,11 @@ _abbr_regular_expansion() {
 
             if [[ -n $prefix_match ]]; then
               if [[ ! $expansion ]]; then
-                expansion=$(_abbr_regular_expansion:get_expansion:get_prefixed_expansion $abbreviation_sans_prefix 1)
+                _abbr_regular_expansion:get_expansion:get_prefixed_expansion $abbreviation_sans_prefix 1
               fi
 
               if [[ ! $expansion ]]; then
-                expansion=$(_abbr_regular_expansion:get_expansion:get_prefixed_expansion $abbreviation_sans_prefix 0)
+                _abbr_regular_expansion:get_expansion:get_prefixed_expansion $abbreviation_sans_prefix 0
               fi
             fi
 
@@ -1247,14 +1246,11 @@ _abbr_regular_expansion() {
             expansion="${(qqq)prefix_match}$expansion"
             # this quotation mark to fix syntax highlighting "
           done
-
-          'builtin' 'echo' - $expansion
         }
 
         # this quotation mark to fix syntax highlighting "
 
         local abbreviation
-        local expansion
         local -i session
 
         abbreviation=$1
@@ -1267,14 +1263,12 @@ _abbr_regular_expansion() {
         fi
 
         if [[ ! $expansion ]]; then
-          expansion=$(_abbr_regular_expansion:get_expansion:get_prefixed_expansion $abbreviation 1)
+          _abbr_regular_expansion:get_expansion:get_prefixed_expansion $abbreviation 1
         fi
 
         if [[ ! $expansion ]]; then
-          expansion=$(_abbr_regular_expansion:get_expansion:get_prefixed_expansion $abbreviation 0)
+          _abbr_regular_expansion:get_expansion:get_prefixed_expansion $abbreviation 0
         fi
-
-        'builtin' 'echo' - $expansion
       } always {
         unfunction -m _abbr_regular_expansion:get_expansion:get_prefixed_expansion
       }
@@ -1287,15 +1281,15 @@ _abbr_regular_expansion() {
     ABBR_SPLIT_FN $abbreviation
     [[ -n $REPLY ]] || return
 
-    expansion=$(_abbr_regular_expansion:get_expansion $abbreviation 1)
+    _abbr_regular_expansion:get_expansion $abbreviation 1
 
     if [[ ! $expansion ]]; then
       _abbr_create_files
       source ${_abbr_tmpdir}regular-user-abbreviations
-      expansion=$(_abbr_regular_expansion:get_expansion $abbreviation 0)
+      _abbr_regular_expansion:get_expansion $abbreviation 0
     fi
 
-    'builtin' 'echo' - ${(Q)expansion}
+    expansion=${(Q)expansion}
   } always {
     unfunction -m _abbr_regular_expansion:get_expansion
   }
@@ -1386,7 +1380,7 @@ abbr-expand-line() {
 
       while [[ -z $expansion ]] && (( k < ${#cmds} )); do
         abbreviation=${cmds[-1]}
-        expansion=$(_abbr_regular_expansion "$abbreviation")
+        _abbr_regular_expansion "$abbreviation"
         (( k++ ))
       done
 
@@ -1409,7 +1403,7 @@ abbr-expand-line() {
       # first check the full linput, then trim words off the front
       while [[ -z $expansion ]] && (( i < ${#words} )); do
         abbreviation=${words:$i}
-        expansion=$(_abbr_global_expansion "$abbreviation" 1)
+        _abbr_global_expansion "$abbreviation" 1
         (( i++ ))
       done
 
@@ -1424,7 +1418,7 @@ abbr-expand-line() {
         # first check the full linput, then trim words off the front
         while [[ -z $expansion ]] && (( i < ${#words} )); do
           abbreviation=${words:$i}
-          expansion=$(_abbr_global_expansion "$abbreviation" 0)
+          _abbr_global_expansion "$abbreviation" 0
           (( i++ ))
         done
       fi
@@ -1485,7 +1479,6 @@ _abbr_global_expansion() {
 
   local -a REPLY
   local abbreviation
-  local expansion
   local -i session
 
   abbreviation=$1
@@ -1502,7 +1495,7 @@ _abbr_global_expansion() {
     expansion=${ABBR_GLOBAL_USER_ABBREVIATIONS[${(qqq)abbreviation}]}
   fi
 
-  'builtin' 'echo' - ${(Q)expansion} #  this bracket for syntax highlighting }
+  expansion=${(Q)expansion} #  this bracket for syntax highlighting }
 }
 
 _abbr_load_user_abbreviations() {
